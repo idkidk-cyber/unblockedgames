@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nova Arcade - Unblocked Games Hub</title>
+    <meta name="description" content="A fast, unblocked web games arcade storing iframe-embedded games in a JSON library with stealth panic switch, theater mode, and custom game manager." />
+    <meta property="og:title" content="Nova Arcade - Unblocked Games Hub" />
+    <meta property="og:description" content="A fast, unblocked web games arcade storing iframe-embedded games in a JSON library with stealth panic switch, theater mode, and custom game manager." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!-- Top Bar Navigation -->
+    <header class="top-nav">
+      <div class="nav-container">
+        <!-- Zone 1: Wordmark -->
+        <a href="#" class="brand-wordmark" onclick="setCategory('All'); return false;">
+          <div class="brand-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="2"></rect></svg>
+          </div>
+          <span>NOVA ARCADE</span>
+        </a>
+
+        <!-- Zone 2: Nav links -->
+        <nav class="nav-links">
+          <button class="nav-btn active" onclick="setCategory('All')">All Games</button>
+          <button class="nav-btn" onclick="setCategory('Arcade')">Arcade</button>
+          <button class="nav-btn" onclick="setCategory('Puzzle')">Puzzle</button>
+          <button class="nav-btn" onclick="setCategory('Favorites')" id="favNavBtn">Favorites</button>
+          <button class="nav-btn" onclick="openJsonModal()" style="font-family: var(--font-mono); font-size: 12px;">games.json</button>
+          <button class="nav-btn" onclick="openCloakModal()" style="font-size: 12px;">Tab Cloak</button>
+        </nav>
+
+        <!-- Zone 3: Panic Action -->
+        <button class="panic-btn" onclick="triggerPanic()" title="Instant Stealth Screen (Esc)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>Panic (Esc)</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-wrapper">
+      <!-- Hero Banner -->
+      <section class="hero-card">
+        <div class="hero-kicker">SANDBOXED IFRAME ENGINE · STORED IN GAMES.JSON</div>
+        <h1 class="hero-title">Unblocked Arcade Powered by JSON Iframes</h1>
+        <p class="hero-desc">
+          Play classic arcade, puzzle, and retro web games embedded inside responsive iframes. Every title is stored directly in a portable JSON database with hotkey stealth panic cloaking.
+        </p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="openGamePlayer('retro-snake')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Play Retro Snake</span>
+          </button>
+          <button class="btn-secondary" onclick="playRandomGame()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="8" cy="8" r="1.5"></circle><circle cx="16" cy="16" r="1.5"></circle><circle cx="8" cy="16" r="1.5"></circle><circle cx="16" cy="8" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle></svg>
+            <span>Random Game</span>
+          </button>
+          <button class="btn-ghost" onclick="openJsonModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            <span>View games.json</span>
+          </button>
+          <a href="./nova-arcade-site.zip" download="nova-arcade-site.zip" class="btn-ghost" style="text-decoration: none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download ZIP</span>
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-label">Database Size</span>
+            <span class="stat-val" id="dbCount">10 Games</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Embed Architecture</span>
+            <span class="stat-val" style="color: var(--accent-sky);">HTML5 Iframe</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Stealth Switch</span>
+            <span class="stat-val" style="color: #22c55e;">Esc Hotkey</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Delivery Model</span>
+            <span class="stat-val">100% Client-Side</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Toolbar: Search & Action Buttons -->
+      <section class="toolbar">
+        <div class="toolbar-row">
+          <div class="search-wrap">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by game title, controls, or tags..." />
+          </div>
+
+          <div class="action-buttons">
+            <button class="action-btn action-btn-accent" onclick="openAddGameModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Add Custom Game</span>
+            </button>
+            <button class="action-btn" onclick="openJsonModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              <span>games.json</span>
+            </button>
+            <button class="action-btn" onclick="openCloakModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Cloak Settings</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Functional Segmented Category Tabs -->
+        <div class="category-strip">
+          <button class="cat-btn active" data-cat="All" onclick="setCategory('All')">All</button>
+          <button class="cat-btn" data-cat="Arcade" onclick="setCategory('Arcade')">Arcade</button>
+          <button class="cat-btn" data-cat="Puzzle" onclick="setCategory('Puzzle')">Puzzle</button>
+          <button class="cat-btn" data-cat="Action" onclick="setCategory('Action')">Action</button>
+          <button class="cat-btn" data-cat="Retro" onclick="setCategory('Retro')">Retro</button>
+          <button class="cat-btn" data-cat="Sports" onclick="setCategory('Sports')">Sports</button>
+          <button class="cat-btn fav-btn-tab" data-cat="Favorites" onclick="setCategory('Favorites')" id="favTabBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#f43f5e" stroke="#f43f5e" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            <span id="favTabCount">Favorites (3)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Section Title & Grid -->
+      <section>
+        <div class="grid-header" style="margin-bottom: 1rem;">
+          <h2 class="grid-title">Arcade Games <span class="grid-count" id="gameCount">(10 available)</span></h2>
+        </div>
+        <div class="games-grid" id="gamesGrid">
+          <!-- Game 1: Retro Snake -->
+          <div class="game-card" onclick="openGamePlayer('retro-snake')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="display:flex;gap:4px;"><div style="width:8px;height:8px;background:#38bdf8;border-radius:2px;"></div><div style="width:8px;height:8px;background:#0284c7;border-radius:2px;"></div><div style="width:8px;height:8px;background:#ef4444;border-radius:50%;"></div></div>
+              </div>
+              <button class="card-fav-btn is-fav" onclick="toggleFavorite('retro-snake', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Arcade</span><span>·</span><span>1,420 plays</span></div>
+                <h3 class="card-title">Retro Snake</h3>
+                <p class="card-desc">Navigate the serpent to consume apples, lengthen your tail, and avoid crashing into boundaries or yourself.</p>
+              </div>
+              <div class="card-foot"><span>Arrow Keys or WASD to turn</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 2: 2048 Classic -->
+          <div class="game-card" onclick="openGamePlayer('2048-classic')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#1e293b;padding:8px;border-radius:6px;"><div style="width:24px;height:24px;background:#f59e0b;color:#fff;font-weight:900;font-size:10px;display:flex;align-items:center;justify-content:center;border-radius:3px;">8</div><div style="width:24px;height:24px;background:#ea580c;color:#fff;font-weight:900;font-size:10px;display:flex;align-items:center;justify-content:center;border-radius:3px;">16</div><div style="width:24px;height:24px;background:#dc2626;color:#fff;font-weight:900;font-size:10px;display:flex;align-items:center;justify-content:center;border-radius:3px;">64</div><div style="width:24px;height:24px;background:#eab308;color:#000;font-weight:900;font-size:8px;display:flex;align-items:center;justify-content:center;border-radius:3px;">2048</div></div>
+              </div>
+              <button class="card-fav-btn is-fav" onclick="toggleFavorite('2048-classic', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Puzzle</span><span>·</span><span>2,890 plays</span></div>
+                <h3 class="card-title">2048 Classic</h3>
+                <p class="card-desc">Slide matching numbered tiles across the grid and combine them strategically to reach the coveted 2048 tile.</p>
+              </div>
+              <div class="card-foot"><span>Arrow Keys or WASD to slide</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 3: Flappy Arcade -->
+          <div class="game-card" onclick="openGamePlayer('flappy-arcade')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="width:28px;height:28px;background:#facc15;border-radius:50%;border:2px solid #ca8a04;position:relative;"><div style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#000;border-radius:50%;"></div><div style="position:absolute;top:10px;right:-4px;width:10px;height:8px;background:#ea580c;border-radius:2px;"></div></div>
+              </div>
+              <button class="card-fav-btn is-fav" onclick="toggleFavorite('flappy-arcade', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Arcade</span><span>·</span><span>3,150 plays</span></div>
+                <h3 class="card-title">Flappy Arcade</h3>
+                <p class="card-desc">Time each flap with precision to maneuver the bird between perilous green pipes and beat your highest score.</p>
+              </div>
+              <div class="card-foot"><span>Spacebar or Tap to flap</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 4: Space Invaders -->
+          <div class="game-card" onclick="openGamePlayer('space-defenders')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="color:#00ff66;font-family:monospace;font-size:18px;letter-spacing:4px;font-weight:bold;">👾 ▲ 👾</div>
+              </div>
+              <button class="card-fav-btn" onclick="toggleFavorite('space-defenders', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Action</span><span>·</span><span>1,820 plays</span></div>
+                <h3 class="card-title">Space Invaders Retro</h3>
+                <p class="card-desc">Pilot your defense cannon and exterminate marching alien fleets before they breach Earth's shield.</p>
+              </div>
+              <div class="card-foot"><span>A/D or Arrows: Move · Space: Fire</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 5: Breakout -->
+          <div class="game-card" onclick="openGamePlayer('breakout-arcade')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="display:flex;gap:3px;"><div style="width:14px;height:6px;background:#ef4444;border-radius:1px;"></div><div style="width:14px;height:6px;background:#eab308;border-radius:1px;"></div><div style="width:14px;height:6px;background:#38bdf8;border-radius:1px;"></div></div><div style="width:6px;height:6px;background:#fff;border-radius:50%;"></div><div style="width:36px;height:6px;background:#38bdf8;border-radius:2px;"></div></div>
+              </div>
+              <button class="card-fav-btn" onclick="toggleFavorite('breakout-arcade', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Arcade</span><span>·</span><span>1,540 plays</span></div>
+                <h3 class="card-title">Breakout Brick Breaker</h3>
+                <p class="card-desc">Bounce the ball off your paddle at strategic angles to smash colorful rows of bricks.</p>
+              </div>
+              <div class="card-foot"><span>Mouse or Arrows to steer paddle</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 6: Dino Runner -->
+          <div class="game-card" onclick="openGamePlayer('dino-runner')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="display:flex;align-items:flex-end;gap:8px;border-bottom:2px solid #475569;padding-bottom:4px;"><div style="width:16px;height:22px;background:#22c55e;border-radius:2px;"></div><div style="width:8px;height:16px;background:#10b981;border-radius:2px;"></div></div>
+              </div>
+              <button class="card-fav-btn" onclick="toggleFavorite('dino-runner', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Arcade</span><span>·</span><span>2,210 plays</span></div>
+                <h3 class="card-title">Dino Desert Runner</h3>
+                <p class="card-desc">Sprint through prehistoric deserts, leap over spiked cacti, and duck beneath airborne pterodactyls.</p>
+              </div>
+              <div class="card-foot"><span>Space / Up: Jump · Down: Duck</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 7: Pong Duel -->
+          <div class="game-card" onclick="openGamePlayer('pong-duel')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="display:flex;align-items:center;justify-content:space-between;width:80px;"><div style="width:4px;height:24px;background:#38bdf8;border-radius:2px;"></div><div style="width:6px;height:6px;background:#fff;border-radius:50%;"></div><div style="width:4px;height:24px;background:#f43f5e;border-radius:2px;"></div></div>
+              </div>
+              <button class="card-fav-btn" onclick="toggleFavorite('pong-duel', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Sports</span><span>·</span><span>980 plays</span></div>
+                <h3 class="card-title">Pong Classic Duel</h3>
+                <p class="card-desc">The seminal 1972 table tennis duel. Play against the responsive CPU paddle or 2-player local.</p>
+              </div>
+              <div class="card-foot"><span>P1: W/S · P2: Up/Down</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 8: Minesweeper -->
+          <div class="game-card" onclick="openGamePlayer('minesweeper-classic')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="display:grid;grid-template-columns:repeat(2,16px);gap:3px;background:#1e293b;padding:4px;border-radius:4px;"><div style="width:16px;height:16px;background:#334155;color:#38bdf8;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;">1</div><div style="width:16px;height:16px;background:#334155;color:#ef4444;font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;">🚩</div></div>
+              </div>
+              <button class="card-fav-btn" onclick="toggleFavorite('minesweeper-classic', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Puzzle</span><span>·</span><span>1,730 plays</span></div>
+                <h3 class="card-title">Minesweeper Retro</h3>
+                <p class="card-desc">Deduce hidden bomb locations with numbered tile clues. Flag hazards carefully.</p>
+              </div>
+              <div class="card-foot"><span>Left click: Uncover · Right click: Flag</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 9: Block Stacker -->
+          <div class="game-card" onclick="openGamePlayer('tetris-stacker')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="display:grid;grid-template-columns:repeat(3,10px);gap:2px;"><div style="width:10px;height:10px;background:#a855f7;border-radius:2px;"></div><div style="width:10px;height:10px;background:#a855f7;border-radius:2px;"></div><div style="width:10px;height:10px;background:#a855f7;border-radius:2px;"></div><div></div><div style="width:10px;height:10px;background:#a855f7;border-radius:2px;"></div><div></div></div>
+              </div>
+              <button class="card-fav-btn is-fav" onclick="toggleFavorite('tetris-stacker', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Puzzle</span><span>·</span><span>3,410 plays</span></div>
+                <h3 class="card-title">Block Stacker Deluxe</h3>
+                <p class="card-desc">Rotate and drop falling geometric tetrominoes, clear complete rows, and use hold reserves.</p>
+              </div>
+              <div class="card-foot"><span>Arrows: Move · Space: Drop · C: Hold</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+
+          <!-- Game 10: Maze Muncher -->
+          <div class="game-card" onclick="openGamePlayer('pac-maze')">
+            <div class="card-thumb">
+              <div class="card-thumb-art">
+                <div style="display:flex;align-items:center;gap:6px;"><div style="width:20px;height:20px;background:#facc15;border-radius:50%;"></div><div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div><div style="width:4px;height:4px;background:#fff;border-radius:50%;"></div></div>
+              </div>
+              <button class="card-fav-btn is-fav" onclick="toggleFavorite('pac-maze', event)" title="Favorite">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+              <div class="card-play-overlay"><div class="play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></div></div>
+            </div>
+            <div class="card-body">
+              <div>
+                <div class="card-meta"><span class="card-cat">Arcade</span><span>·</span><span>2,680 plays</span></div>
+                <h3 class="card-title">Maze Muncher Arcade</h3>
+                <p class="card-desc">Navigate labyrinthine blue corridors, collect every dot, grab power pellets, and chase ghosts.</p>
+              </div>
+              <div class="card-foot"><span>Arrow Keys or WASD to navigate</span><span class="card-play-arrow">Play →</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div>
+          <strong style="color: #cbd5e1;">Nova Arcade</strong> · JSON Iframe Game Hub · No AI Features
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <span>Press <kbd style="background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #fff; font-family: monospace;">Esc</kbd> for Stealth Panic</span>
+          <a href="#" onclick="openJsonModal(); return false;" style="color: inherit;">Export JSON</a>
+          <a href="#" onclick="openCloakModal(); return false;" style="color: inherit;">Tab Cloaking</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Game Player Modal -->
+    <div id="playerModal" class="modal-backdrop hidden">
+      <div class="modal-box player-box" id="playerBox">
+        <div class="player-bar">
+          <div class="player-title-wrap">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--accent-sky);"></div>
+            <div>
+              <div style="font-weight: bold; font-size: 14px; color: #fff;" id="playerTitle">Game</div>
+              <div style="font-size: 11px; color: var(--text-muted);">
+                <span id="playerCat">Arcade</span> · <span id="playerPlays">0 plays</span>
+              </div>
+            </div>
+          </div>
+          <div class="player-controls-btns">
+            <button class="player-btn" id="playerFavBtn" onclick="toggleFavorite(currentPlayingGame.id)" title="Favorite"></button>
+            <button class="player-btn" onclick="reloadGame()" title="Reload Frame">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            </button>
+            <button class="player-btn" onclick="toggleTheaterMode()" title="Theater Mode">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+            </button>
+            <button class="player-btn" onclick="toggleFullscreen()" title="Fullscreen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            </button>
+            <button class="player-btn" onclick="openBlankTab()" title="Open in Blank Tab">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </button>
+            <div style="width: 1px; height: 18px; background: #334155; margin: 0 4px;"></div>
+            <button class="player-btn" onclick="closeGamePlayer()" title="Close">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="player-frame-wrap">
+          <iframe id="gameIframe" class="player-iframe" sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms" allow="fullscreen; autoplay; gamepad"></iframe>
+        </div>
+
+        <div class="player-footer">
+          <div>
+            <div style="color: #cbd5e1; font-weight: 600;">Controls: <span id="playerControls" style="font-weight: normal; color: var(--text-muted);"></span></div>
+            <div id="playerDesc" style="color: #64748b; font-size: 11px; margin-top: 2px;"></div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="copyEmbedBtn" onclick="copyEmbedCode()" class="action-btn">Copy Embed</button>
+            <button onclick="reloadGame()" class="action-btn">Restart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON Database Modal -->
+    <div id="jsonModal" class="modal-backdrop hidden">
+      <div class="modal-box" style="max-width: 760px;">
+        <div class="modal-head">
+          <div>
+            <h2>games.json Library Database</h2>
+            <p style="font-size: 11px; color: #94a3b8;">Directly inspect or edit the JSON database storing all iframe entries.</p>
+          </div>
+          <button class="modal-close" onclick="closeJsonModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="background: #090d16; padding: 8px 16px; border-bottom: 1px solid var(--border-color); display: flex; gap: 8px; justify-content: space-between;">
+          <div style="display: flex; gap: 8px;">
+            <button id="copyJsonBtn" class="action-btn" onclick="copyJson()">Copy JSON</button>
+            <button class="action-btn" onclick="downloadJson()">Download games.json</button>
+          </div>
+          <button class="action-btn" onclick="resetDefaultGames()" style="color: #f43f5e; border-color: rgba(244,63,94,0.3);">Reset Defaults</button>
+        </div>
+        <div class="modal-body" style="padding: 12px;">
+          <textarea id="jsonEditor" class="form-textarea" rows="16" style="width: 100%; color: #34d399; font-size: 12px;"></textarea>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-secondary" onclick="closeJsonModal()">Cancel</button>
+          <button class="btn-primary" onclick="saveJsonChanges()">Save JSON Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Custom Game Modal -->
+    <div id="addGameModal" class="modal-backdrop hidden">
+      <div class="modal-box">
+        <div class="modal-head">
+          <h2>Add Game to JSON Library</h2>
+          <button class="modal-close" onclick="closeAddGameModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <form id="addGameForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Game Title *</label>
+              <input type="text" id="newGameTitle" class="form-input" required placeholder="e.g. Slope 3D" />
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select id="newGameCategory" class="form-select">
+                  <option value="Arcade">Arcade</option>
+                  <option value="Puzzle">Puzzle</option>
+                  <option value="Action">Action</option>
+                  <option value="Retro">Retro</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Strategy">Strategy</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tags</label>
+                <input type="text" id="newGameTags" class="form-input" placeholder="Arcade, Fun" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Iframe URL or &lt;iframe&gt; Embed Code *</label>
+              <textarea id="newGameSrc" class="form-textarea" rows="3" required placeholder="Paste iframe URL (e.g. ./games/mygame.html or https://...) or full <iframe src='...'></iframe>"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Controls Guide</label>
+              <input type="text" id="newGameControls" class="form-input" placeholder="e.g. Arrow keys to steer" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <input type="text" id="newGameDesc" class="form-input" placeholder="Brief description of gameplay..." />
+            </div>
+          </div>
+          <div class="modal-foot">
+            <button type="button" class="btn-secondary" onclick="closeAddGameModal()">Cancel</button>
+            <button type="submit" class="btn-primary">Add to Library</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tab Cloak Modal -->
+    <div id="cloakModal" class="modal-backdrop hidden">
+      <div class="modal-box">
+        <div class="modal-head">
+          <h2>Tab Cloaking & Stealth</h2>
+          <button class="modal-close" onclick="closeCloakModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 12px; color: var(--text-muted);">Disguise your browser tab title and favicon to appear as school or work portals.</p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="action-btn" onclick="setCloakPreset('none')" style="text-align: left; padding: 10px; display: block;">
+              <strong style="color: #fff;">Default (No Cloak)</strong>
+              <div style="font-size: 11px; color: #94a3b8;">Nova Arcade - Unblocked Games Hub</div>
+            </button>
+            <button class="action-btn" onclick="setCloakPreset('classroom')" style="text-align: left; padding: 10px; display: block;">
+              <strong style="color: #fff;">Google Classroom</strong>
+              <div style="font-size: 11px; color: #94a3b8;">Classes · Google Classroom</div>
+            </button>
+            <button class="action-btn" onclick="setCloakPreset('docs')" style="text-align: left; padding: 10px; display: block;">
+              <strong style="color: #fff;">Google Docs</strong>
+              <div style="font-size: 11px; color: #94a3b8;">AP European History - Unit 4 Study Guide</div>
+            </button>
+            <button class="action-btn" onclick="setCloakPreset('drive')" style="text-align: left; padding: 10px; display: block;">
+              <strong style="color: #fff;">Google Drive</strong>
+              <div style="font-size: 11px; color: #94a3b8;">My Drive - Google Drive</div>
+            </button>
+            <button class="action-btn" onclick="setCloakPreset('canvas')" style="text-align: left; padding: 10px; display: block;">
+              <strong style="color: #fff;">Canvas LMS</strong>
+              <div style="font-size: 11px; color: #94a3b8;">Dashboard · Canvas Network</div>
+            </button>
+            <button class="action-btn" onclick="setCloakPreset('wikipedia')" style="text-align: left; padding: 10px; display: block;">
+              <strong style="color: #fff;">Wikipedia</strong>
+              <div style="font-size: 11px; color: #94a3b8;">Photosynthesis - Wikipedia</div>
+            </button>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-primary" onclick="closeCloakModal()">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panic Cloak Fullscreen Disguise Overlay -->
+    <div id="panicOverlay" class="panic-overlay hidden">
+      <!-- Hover secret unlock -->
+      <div class="panic-secret-banner">
+        <div class="panic-secret-box">
+          <span>Stealth Active (Esc to exit)</span>
+          <button onclick="hidePanic()" class="btn-primary" style="padding: 2px 8px; font-size: 11px;">Return</button>
+        </div>
+      </div>
+
+      <!-- Disguise: Google Docs -->
+      <div style="min-height: 100vh; background: #f9fbfd; display: flex; flex-direction: column; font-family: sans-serif;">
+        <div style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 32px; height: 38px; background: #2563eb; color: #fff; font-weight: bold; font-size: 10px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">DOC</div>
+            <div>
+              <div style="font-size: 16px; font-weight: 500; color: #1e293b;">AP European History - Unit 4 Study Guide</div>
+              <div style="display: flex; gap: 12px; font-size: 12px; color: #64748b; margin-top: 2px;">
+                <span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Tools</span>
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #94a3b8;">All changes saved to Drive</div>
+        </div>
+        <div style="flex: 1; display: flex; justify-content: center; padding: 24px 16px;">
+          <div style="width: 100%; max-width: 800px; min-height: 800px; background: #fff; padding: 48px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <textarea style="width: 100%; height: 750px; border: none; outline: none; resize: none; font-size: 14px; line-height: 1.6; color: #1e293b; font-family: sans-serif;">AP European History - Unit 4 Study Guide
+Instructor: Dr. Harrison · Fall Semester
+
+I. The Scientific Revolution & Enlightenment Principles
+During the seventeenth and eighteenth centuries, European intellectual traditions experienced profound restructuring. Empirical observation, formalized by Francis Bacon and René Descartes, supplanted scholastic orthodoxy.
+
+Key Concepts for Thursday's Exam:
+1. Heliocentrism vs. Geocentric Ptolemaic paradigms (Copernicus, Kepler, Galileo).
+2. Newton's Principia Mathematica (1687) and universal gravitation synthesis.
+3. Social contract philosophy: Thomas Hobbes vs. John Locke on natural rights and popular sovereignty.
+
+Discussion Question:
+How did the diffusion of encyclopedic print media alter public discourse in urban coffeehouses? Be prepared to cite Diderot's Encyclopédie in your response.</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load Main App Engine -->
+    <script src="./app.js"></script>
+    <script>
+      if (typeof window.openGamePlayer !== 'function') {
+        var s = document.createElement('script');
+        s.src = './index.js';
+        document.body.appendChild(s);
+      }
+    </script>
+  </body>
+</html>

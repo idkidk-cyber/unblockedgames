@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maze Muncher Classic</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: #090d16;
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .box {
+      position: relative;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      width: 380px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    .hud span { color: #facc15; }
+    canvas {
+      background: #000;
+      border: 2px solid #1e3a8a;
+      border-radius: 8px;
+      display: block;
+    }
+    .hint {
+      font-size: 12px;
+      color: #64748b;
+    }
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      border-radius: 12px;
+    }
+    .overlay.hidden { display: none; }
+    .btn {
+      background: #facc15;
+      color: #000;
+      border: none;
+      padding: 10px 24px;
+      font-weight: 800;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn:hover { background: #eab308; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="hud">
+      <div>SCORE: <span id="scoreVal">0</span></div>
+      <div>LIVES: <span id="livesVal">3</span></div>
+    </div>
+    <canvas id="canvas" width="380" height="380"></canvas>
+    <div class="hint">Use Arrow Keys or WASD to navigate the maze</div>
+
+    <div id="startOverlay" class="overlay">
+      <h2 style="font-size: 28px; font-weight: 800; color: #facc15;">MAZE MUNCHER</h2>
+      <p style="color: #cbd5e1; font-size: 14px;">Chomp all dots, grab power pellets & evade ghosts!</p>
+      <button class="btn" id="startBtn">START GAME</button>
+    </div>
+
+    <div id="gameOverOverlay" class="overlay hidden">
+      <h2 id="overTitle" style="font-size: 26px; font-weight: 800; color: #ef4444;">GAME OVER</h2>
+      <p style="font-size: 14px;">Final Score: <span id="finalScore" style="color: #facc15; font-weight: bold;">0</span></p>
+      <button class="btn" id="restartBtn">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const scoreVal = document.getElementById('scoreVal');
+    const livesVal = document.getElementById('livesVal');
+    const finalScore = document.getElementById('finalScore');
+    const overTitle = document.getElementById('overTitle');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    // Audio
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq, type = 'sine', duration = 0.05) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      try {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    const GRID = 19;
+    const TILE = 20;
+
+    // 1: wall, 0: dot, 2: power pellet, 3: empty
+    const MAP_TEMPLATE = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,2,0,0,0,0,0,0,1,0,0,0,0,0,0,2,0,0,1],
+      [1,0,1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,0,1],
+      [1,0,1,1,0,1,1,0,1,0,1,1,0,1,1,0,1,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,1,1,0,1,0,1,1,1,0,1,0,1,1,0,1,0,1],
+      [1,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,1,0,1],
+      [1,1,1,1,0,1,1,3,3,3,1,1,0,1,1,1,1,0,1],
+      [1,3,3,1,0,1,3,3,3,3,3,1,0,1,3,3,1,0,1],
+      [1,1,1,1,0,1,3,3,3,3,3,1,0,1,1,1,1,0,1],
+      [1,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,1],
+      [1,0,1,1,0,0,0,0,1,0,0,0,0,1,1,0,1,0,1],
+      [1,0,0,1,0,1,1,0,1,0,1,1,0,1,0,0,1,0,1],
+      [1,1,0,1,0,0,0,0,3,0,0,0,0,1,0,1,1,0,1],
+      [1,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0,0,0,1],
+      [1,0,1,1,1,1,0,0,1,0,0,1,1,1,1,0,1,0,1],
+      [1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,1],
+      [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+
+    let map = [];
+    let score = 0;
+    let lives = 3;
+    let isRunning = false;
+    let pac = { x: 9, y: 13, dx: 0, dy: 0, nextDx: 0, nextDy: 0, mouth: 0.2, mouthDir: 1 };
+    let ghosts = [];
+    let frightenTimer = 0;
+    let animId = null;
+
+    function initGame() {
+      map = MAP_TEMPLATE.map(row => [...row]);
+      score = 0;
+      lives = 3;
+      scoreVal.textContent = 0;
+      livesVal.textContent = 3;
+      resetPositions();
+      isRunning = true;
+      startOverlay.classList.add('hidden');
+      gameOverOverlay.classList.add('hidden');
+      cancelAnimationFrame(animId);
+      lastTick = performance.now();
+      loop(performance.now());
+    }
+
+    function resetPositions() {
+      pac = { x: 9, y: 13, dx: 0, dy: 0, nextDx: 0, nextDy: 0, mouth: 0.2, mouthDir: 1 };
+      ghosts = [
+        { x: 9, y: 8, color: '#ef4444', dx: 1, dy: 0 },
+        { x: 8, y: 8, color: '#ec4899', dx: -1, dy: 0 },
+        { x: 10, y: 8, color: '#06b6d4', dx: 0, dy: -1 },
+        { x: 9, y: 9, color: '#f97316', dx: 0, dy: 1 }
+      ];
+    }
+
+    let lastTick = 0;
+    const TICK_RATE = 160;
+
+    function loop(time) {
+      if (!isRunning) return;
+
+      if (time - lastTick > TICK_RATE) {
+        update();
+        lastTick = time;
+      }
+      draw();
+      animId = requestAnimationFrame(loop);
+    }
+
+    function canMove(gx, gy) {
+      if (gx < 0 || gx >= GRID || gy < 0 || gy >= GRID) return false;
+      return map[gy][gx] !== 1;
+    }
+
+    function update() {
+      // Pacman turns if queued direction is clear
+      if (canMove(pac.x + pac.nextDx, pac.y + pac.nextDy)) {
+        pac.dx = pac.nextDx;
+        pac.dy = pac.nextDy;
+      }
+
+      // Move pacman
+      if (canMove(pac.x + pac.dx, pac.y + pac.dy)) {
+        pac.x += pac.dx;
+        pac.y += pac.dy;
+      }
+
+      // Eat dot
+      if (map[pac.y][pac.x] === 0) {
+        map[pac.y][pac.x] = 3;
+        score += 10;
+        scoreVal.textContent = score;
+        playBeep(450, 'sine', 0.03);
+      } else if (map[pac.y][pac.x] === 2) {
+        map[pac.y][pac.x] = 3;
+        score += 50;
+        scoreVal.textContent = score;
+        frightenTimer = 40;
+        playBeep(700, 'triangle', 0.12);
+      }
+
+      if (frightenTimer > 0) frightenTimer--;
+
+      // Check remaining dots
+      let dotsLeft = 0;
+      for (let r = 0; r < GRID; r++) {
+        for (let c = 0; c < GRID; c++) {
+          if (map[r][c] === 0 || map[r][c] === 2) dotsLeft++;
+        }
+      }
+      if (dotsLeft === 0) {
+        return endGame(true);
+      }
+
+      // Move ghosts
+      ghosts.forEach(g => {
+        const validDirs = [
+          { dx: 1, dy: 0 }, { dx: -1, dy: 0 },
+          { dx: 0, dy: 1 }, { dx: 0, dy: -1 }
+        ].filter(d => canMove(g.x + d.dx, g.y + d.dy) && (d.dx !== -g.dx || d.dy !== -g.dy));
+
+        if (validDirs.length > 0) {
+          const chosen = validDirs[Math.floor(Math.random() * validDirs.length)];
+          g.dx = chosen.dx;
+          g.dy = chosen.dy;
+        }
+
+        if (canMove(g.x + g.dx, g.y + g.dy)) {
+          g.x += g.dx;
+          g.y += g.dy;
+        }
+
+        // Ghost collision with pac
+        if (g.x === pac.x && g.y === pac.y) {
+          if (frightenTimer > 0) {
+            // Eat ghost
+            score += 200;
+            scoreVal.textContent = score;
+            g.x = 9; g.y = 8;
+            playBeep(900, 'square', 0.15);
+          } else {
+            // Pac dies
+            lives--;
+            livesVal.textContent = lives;
+            playBeep(200, 'sawtooth', 0.25);
+            if (lives <= 0) {
+              return endGame(false);
+            } else {
+              resetPositions();
+            }
+          }
+        }
+      });
+    }
+
+    function draw() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw map
+      for (let r = 0; r < GRID; r++) {
+        for (let c = 0; c < GRID; c++) {
+          const val = map[r][c];
+          if (val === 1) {
+            ctx.fillStyle = '#1e3a8a';
+            ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
+            ctx.strokeStyle = '#3b82f6';
+            ctx.strokeRect(c * TILE + 2, r * TILE + 2, TILE - 4, TILE - 4);
+          } else if (val === 0) {
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(c * TILE + TILE / 2, r * TILE + TILE / 2, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (val === 2) {
+            ctx.fillStyle = (Date.now() % 400 < 200) ? '#fef08a' : '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(c * TILE + TILE / 2, r * TILE + TILE / 2, 6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // Draw pacman
+      ctx.fillStyle = '#facc15';
+      const px = pac.x * TILE + TILE / 2;
+      const py = pac.y * TILE + TILE / 2;
+      let angle = 0;
+      if (pac.dx === 1) angle = 0;
+      else if (pac.dx === -1) angle = Math.PI;
+      else if (pac.dy === 1) angle = Math.PI / 2;
+      else if (pac.dy === -1) angle = -Math.PI / 2;
+
+      ctx.beginPath();
+      ctx.arc(px, py, TILE / 2 - 2, angle + 0.25 * Math.PI, angle + 1.75 * Math.PI);
+      ctx.lineTo(px, py);
+      ctx.fill();
+
+      // Draw ghosts
+      ghosts.forEach(g => {
+        const gx = g.x * TILE + 2;
+        const gy = g.y * TILE + 2;
+        ctx.fillStyle = frightenTimer > 0 ? (frightenTimer < 10 && Date.now() % 200 < 100 ? '#fff' : '#3b82f6') : g.color;
+        ctx.beginPath();
+        ctx.arc(gx + TILE / 2 - 2, gy + TILE / 2 - 4, TILE / 2 - 3, Math.PI, 0, false);
+        ctx.lineTo(gx + TILE - 4, gy + TILE - 4);
+        ctx.lineTo(gx, gy + TILE - 4);
+        ctx.closePath();
+        ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(gx + 5, gy + 5, 2.5, 0, Math.PI * 2);
+        ctx.arc(gx + 11, gy + 5, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(gx + 5 + g.dx, gy + 5 + g.dy, 1.2, 0, Math.PI * 2);
+        ctx.arc(gx + 11 + g.dx, gy + 5 + g.dy, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function endGame(won) {
+      isRunning = false;
+      finalScore.textContent = score;
+      overTitle.textContent = won ? 'YOU CLEARED THE MAZE!' : 'GAME OVER';
+      overTitle.style.color = won ? '#22c55e' : '#ef4444';
+      gameOverOverlay.classList.remove('hidden');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      if (key === 'arrowleft' || key === 'a') { pac.nextDx = -1; pac.nextDy = 0; }
+      else if (key === 'arrowright' || key === 'd') { pac.nextDx = 1; pac.nextDy = 0; }
+      else if (key === 'arrowup' || key === 'w') { pac.nextDx = 0; pac.nextDy = -1; }
+      else if (key === 'arrowdown' || key === 's') { pac.nextDx = 0; pac.nextDy = 1; }
+    });
+
+    startBtn.addEventListener('click', initGame);
+    restartBtn.addEventListener('click', initGame);
+    draw();
+  </script>
+</body>
+</html>
