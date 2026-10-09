@@ -35,7 +35,13 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_GAMES_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((g) => ({
+            ...g,
+            iframeSrc: g.iframeSrc && g.iframeSrc.startsWith('/games/') ? '.' + g.iframeSrc : g.iframeSrc,
+            iframeCode: g.iframeCode ? g.iframeCode.replace(/src="\/games\//g, 'src="./games/') : g.iframeCode
+          }));
+        }
       }
     } catch (e) {
       console.warn('Failed to parse saved games:', e);
@@ -86,7 +92,7 @@ export default function App() {
     };
 
     const favicons = {
-      none: '/favicon.ico',
+      none: './favicon.svg',
       classroom: 'https://ssl.gstatic.com/classroom/favicon.png',
       docs: 'https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico',
       drive: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png',
@@ -102,7 +108,7 @@ export default function App() {
       link.rel = 'icon';
       document.getElementsByTagName('head')[0].appendChild(link);
     }
-    link.href = favicons[cloakPreset] || '/favicon.ico';
+    link.href = favicons[cloakPreset] || './favicon.svg';
   }, [cloakPreset, customTitle]);
 
   // Global Panic Key Listener (Esc triggers panic disguise screen)

@@ -46,9 +46,21 @@ export const GamePlayerModal = ({
     setTimeout(() => setCopiedEmbed(false), 2000);
   };
 
+  const resolveGameUrl = (src) => {
+    if (!src) return '';
+    if (src.startsWith('http://') || src.startsWith('https://')) return src;
+    if (src.startsWith('/games/')) {
+      return '.' + src;
+    }
+    return src;
+  };
+
+  const resolvedSrc = resolveGameUrl(game.iframeSrc);
+
   const handleOpenBlank = () => {
     const win = window.open('about:blank', '_blank');
     if (win) {
+      const fullUrl = new URL(resolvedSrc, window.location.href).href;
       win.document.write(`
         <!DOCTYPE html>
         <html>
@@ -60,7 +72,7 @@ export const GamePlayerModal = ({
             </style>
           </head>
           <body>
-            <iframe src="${window.location.origin}${game.iframeSrc}" allowfullscreen></iframe>
+            <iframe src="${fullUrl}" allowfullscreen></iframe>
           </body>
         </html>
       `);
@@ -183,7 +195,7 @@ export const GamePlayerModal = ({
         >
           <iframe
             key={iframeKey}
-            src={game.iframeSrc}
+            src={resolvedSrc}
             title={game.title}
             className="w-full h-full border-0 select-none"
             sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms"
